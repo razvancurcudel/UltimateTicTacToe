@@ -15,7 +15,6 @@
 //    For the full copyright and license information, please view the LICENSE
 //    file that was distributed with this source code.
 
-package bot;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -48,5 +47,6 @@ public class BotStarter {
 	public static void main(String[] args) {
 		BotParser parser = new BotParser(new BotStarter());
 		parser.run();
+		
 	}
 }
