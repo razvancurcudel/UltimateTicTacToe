@@ -19,24 +19,34 @@ package bot;
 
 /**
  * Move class
- * 
+ * <p>
  * Stores a move.
- * 
+ *
  * @author Jim van Eeden <jim@starapple.nl>, Joost de Meij <joost@starapple.nl>
  */
 
-public class Move {
-	int mX, mY;
-	
-	public Move() {
-	}
-	
-	public Move(int x, int y) {
-		mX = x;
-		mY = y;
-	}
-	
-	public int getX() { return mX; }
-	public int getY() { return mY; }
-	
+public class Move
+{
+    int mX, mY;
+
+    public Move()
+    {
+    }
+
+    public Move(int x, int y)
+    {
+        mX = x;
+        mY = y;
+    }
+
+    public int getX()
+    {
+        return mX;
+    }
+
+    public int getY()
+    {
+        return mY;
+    }
+
 }
