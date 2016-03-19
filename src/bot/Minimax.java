@@ -12,7 +12,7 @@ public class Minimax {
 
 	}
 
-	
+	// test git: muieeeeeeeeeeeeeeee
 	//could be better with alpha beta.
 	public int minimax(Field field, int depth, boolean maximize) { // maximize = true --> your turn
 																	// maximize = false -->
