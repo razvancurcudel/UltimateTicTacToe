@@ -1,11 +1,10 @@
 package bot;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
-/**
- * @author Curcudel Ioan-Razvan
- */
-
+// TODO: Implement Alpha-beta pruning
 public class Minimax
 {
 
@@ -15,7 +14,7 @@ public class Minimax
     }
 
     //could be better with alpha beta.
-    public int minimax(Field field, int depth, boolean maximize)
+    public Move minimax(Field field, int depth, boolean maximize)
     { // maximize = true --> your turn
         // maximize = false -->
         // opponent's turn
@@ -23,72 +22,88 @@ public class Minimax
 
         if (depth == 0 || moves.size() == 0)
         {
-            return field.computeScore();
+            Move m = new Move(-1, -1); // Coordinates don't matter
+            m.score = field.computeScore();
+
+            return m;
         }
         // Generate all moves possible
         // Make a copy of field, place first move and create a node
         // Apply minimax on that note with depth-1;
 
+        // Create comparator based on maximize value
+        Comparator<Move> comparator;
         if (maximize)
         {
-            int bestScore = -Integer.MAX_VALUE;
-            for (int i = 0; i < moves.size(); i++)
-            {
-                Field copy = field.createCopy();
-                copy.placeMove(moves.get(i), maximize);
-                int score = minimax(copy, depth - 1, !maximize);
-                bestScore = Math.max(bestScore, score);
-            }
-            return bestScore;
+            comparator = new MaximizeComparator();
         } else
         {
-            int bestScore = Integer.MAX_VALUE;
-            for (int i = 0; i < moves.size(); i++)
+            comparator = new MinimizeComparator();
+        }
+
+        /**
+         * Priority queue will store all possible moves with their score.
+         *
+         * Maximize == True
+         *      PQ will return the highest score
+         * Maximize == False
+         *      PQ will return the smallest score
+         */
+        PriorityQueue<Move> queue = new PriorityQueue<>(1, comparator);
+
+        for (int i = 0; i < moves.size(); i++)
+        {
+            // Create copy of field and place move
+            Field copy = field.createCopy();
+            copy.placeMove(moves.get(i), maximize);
+
+            // Get score of this move
+            Move minMaxResult = minimax(copy, depth - 1, !maximize);
+
+            // Push this move to the queue
+            moves.get(i).score = minMaxResult.score;
+            queue.add(moves.get(i));
+        }
+
+        // Return best move for our case
+        return queue.peek();
+
+    }
+
+    class MaximizeComparator implements Comparator<Move>
+    {
+        @Override
+        public int compare(Move X, Move Y)
+        {
+            if (X.score == Y.score)
             {
-                Field copy = field.createCopy();
-                copy.placeMove(moves.get(i), maximize);
-                int score = minimax(copy, depth - 1, !maximize);
-                bestScore = Math.min(bestScore, score);
+                return 0;
+            } else if (X.score > Y.score)
+            {
+                return 1;
+            } else    // X.score < Y.score
+            {
+                return -1;
             }
-            return bestScore;
         }
     }
 
-//	public int minimax(Node root, int depth, boolean maximize) { // maximize = true --> your turn
-//		// maximize = false -->
-//		// opponent's turn
-//		if (depth == 0 || root.children.size() == 0) {
-//			// return root.getEval(); // evaluate heuristic if is leaf
-//			return 0;
-//		}
-//		// Generate all moves possible
-//		// Make a copy of field, place first move and create a node
-//		// Apply minimax on that note with depth-1;
-//		ArrayList<Move> moves = root.field.getAvailableMoves();
-//
-//		if (maximize) {
-//			int bestScore = -Integer.MAX_VALUE;
-//			for (int i = 0; i < moves.size(); i++) {
-//				Field copy = root.field.createCopy();
-//				copy.placeMove(moves.get(i), maximize);
-//				Node child = new Node(copy);
-//				root.children.add(child);
-//				child.score = minimax(child, depth - 1, !maximize);
-//				bestScore = Math.max(bestScore, child.score);
-//			}
-//			return bestScore;
-//		} else {
-//			int bestScore = Integer.MAX_VALUE;
-//			for (int i = 0; i < moves.size(); i++) {
-//				Field copy = root.field.createCopy();
-//				copy.placeMove(moves.get(i), maximize);
-//				Node child = new Node(copy);
-//				root.children.add(child);
-//				child.score = minimax(child, depth - 1, !maximize);
-//				bestScore = Math.min(bestScore, child.score);
-//			}
-//		}
-//		return 0;
-//	}
+    class MinimizeComparator implements Comparator<Move>
+    {
+        @Override
+        public int compare(Move X, Move Y)
+        {
+            if (X.score == Y.score)
+            {
+                return 0;
+            } else if (X.score > Y.score)
+            {
+                return -1;
+            } else    // X.score < Y.score
+            {
+                return 1;
+            }
+        }
+    }
 
 }

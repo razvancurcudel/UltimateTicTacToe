@@ -27,16 +27,25 @@ package bot;
 
 public class Move
 {
+    public int score;
     int mX, mY;
 
     public Move()
     {
+        this.score = 0;
+    }
+
+    public Move(int score)
+    {
+        this.score = score;
     }
 
     public Move(int x, int y)
     {
         mX = x;
         mY = y;
+
+        this.score = 0;
     }
 
     public int getX()
