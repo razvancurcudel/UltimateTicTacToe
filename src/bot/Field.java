@@ -19,11 +19,11 @@ package bot;
 
 import java.util.ArrayList;
 
+import static java.util.Arrays.asList;
+
 /**
- * Field class
- * <p>
- * Handles everything that has to do with the field, such as storing the current state and
- * performing calculations on the field.
+ * Field class <p> Handles everything that has to do with the field, such as storing the current
+ * state and performing calculations on the field.
  *
  * @author Jim van Eeden <jim@starapple.nl>, Joost de Meij <joost@starapple.nl>
  */
@@ -38,7 +38,7 @@ public class Field
     private int[][] mMacroboard;
     private String mLastError = "";
 
-    public Field()
+    public Field ()
     {
         mBoard = new int[COLS][ROWS];
         mMacroboard = new int[COLS / 3][ROWS / 3];
@@ -51,18 +51,21 @@ public class Field
      * @param key   : type of data given
      * @param value : value
      */
-    public void parseGameData(String key, String value)
+    public void parseGameData (String key, String value)
     {
         if (key.equals("round"))
         {
             mRoundNr = Integer.parseInt(value);
-        } else if (key.equals("move"))
+        }
+        else if (key.equals("move"))
         {
             mMoveNr = Integer.parseInt(value);
-        } else if (key.equals("field"))
+        }
+        else if (key.equals("field"))
         {
             parseFromString(value); /* Parse Field with data */
-        } else if (key.equals("macroboard"))
+        }
+        else if (key.equals("macroboard"))
         {
             parseMacroboardFromString(value); /* Parse macroboard with data */
         }
@@ -73,7 +76,7 @@ public class Field
      *
      * @param s :
      */
-    public void parseFromString(String s)
+    public void parseFromString (String s)
     {
         System.err.println("Move " + mMoveNr);
         s = s.replace(";", ",");
@@ -94,7 +97,7 @@ public class Field
      *
      * @param s :
      */
-    public void parseMacroboardFromString(String s)
+    public void parseMacroboardFromString (String s)
     {
         String[] r = s.split(",");
         int counter = 0;
@@ -108,7 +111,7 @@ public class Field
         }
     }
 
-    public void clearBoard()
+    public void clearBoard ()
     {
         for (int x = 0; x < COLS; x++)
         {
@@ -119,7 +122,7 @@ public class Field
         }
     }
 
-    public ArrayList<Move> getAvailableMoves()
+    public ArrayList<Move> getAvailableMoves ()
     {
         ArrayList<Move> moves = new ArrayList<Move>();
 
@@ -137,7 +140,7 @@ public class Field
         return moves;
     }
 
-    public Boolean isInActiveMicroboard(int x, int y)
+    public Boolean isInActiveMicroboard (int x, int y)
     {
         return mMacroboard[(int) x / 3][(int) y / 3] == -1;
     }
@@ -147,7 +150,7 @@ public class Field
      *
      * @return : reason why addMove returns false
      */
-    public String getLastError()
+    public String getLastError ()
     {
         return mLastError;
     }
@@ -160,7 +163,7 @@ public class Field
      *            :
      * @return : String with player names for every cell, or 'empty' when cell is empty.
      */
-    public String toString()
+    public String toString ()
     {
         String r = "";
         int counter = 0;
@@ -182,10 +185,9 @@ public class Field
     /**
      * Checks whether the field is full
      *
-     *
      * @return : Returns true when field is full, otherwise returns false.
      */
-    public boolean isFull()
+    public boolean isFull ()
     {
         for (int x = 0; x < COLS; x++)
             for (int y = 0; y < ROWS; y++)
@@ -195,17 +197,17 @@ public class Field
         return true;
     }
 
-    public int getNrColumns()
+    public int getNrColumns ()
     {
         return COLS;
     }
 
-    public int getNrRows()
+    public int getNrRows ()
     {
         return ROWS;
     }
 
-    public boolean isEmpty()
+    public boolean isEmpty ()
     {
         for (int x = 0; x < COLS; x++)
         {
@@ -223,17 +225,17 @@ public class Field
     /**
      * Returns the player id on given column and row
      *
-     * @param  column
+     * @param column
      * @param row
      *
      * @return : int
      */
-    public int getPlayerId(int column, int row)
+    public int getPlayerId (int column, int row)
     {
         return mBoard[column][row];
     }
 
-    public Field createCopy()
+    public Field createCopy ()
     {
         Field clone = new Field();
         clone.mRoundNr = this.mRoundNr;
@@ -255,30 +257,61 @@ public class Field
         return clone;
     }
 
-    public void placeMove(Move move, boolean maximize)
+    public void placeMove (Move move, boolean maximize)
     {
         if (maximize)
         {
             mBoard[move.getX()][move.getY()] = 1;
-        } else
+        }
+        else
         {
             mBoard[move.getX()][move.getY()] = 2;
         }
     }
 
     /**
-     * Steps (so far):
-     * <p>
-     * 1) Check win/lose condition -> MAX/MIN_VALUE
-     * 2) Check macroBoard -> TBP points
-     * (2.1) Ignore dead boards
-     * 3) Check each miniBoard -> TBP points
-     * (3.1) Ignore dead squares
+     * Steps (so far): <p> 1) Check win/lose condition -> MAX/MIN_VALUE 2) Check macroBoard -> TBP
+     * points (2.1) Ignore dead boards 3) Check each miniBoard -> TBP points (3.1) Ignore dead
+     * squares
      *
      * @return The score for the current field - sum of all points
      */
-    public int computeScore()
+    public int computeScore ()
     {
         return -1;
+    }
+
+    public ArrayList<ArrayList<Integer>> getEverything (int[][] matrix)
+    {
+
+        /*
+
+        ArrayList<String> list = new ArrayList<String>()
+            {{
+                add("A");
+                add("B");
+                add("C");
+            }};
+
+            List<String> strings = new ArrayList<>(asList("foo", "bar", "baz"));
+        * */
+
+        ArrayList<ArrayList<Integer>> everything = new ArrayList<ArrayList<Integer>>();
+
+        // Linii
+        everything.add(new ArrayList<>(asList(matrix[0][0], matrix[0][1], matrix[0][2])));
+        everything.add(new ArrayList<>(asList(matrix[1][0], matrix[1][1], matrix[1][2])));
+        everything.add(new ArrayList<>(asList(matrix[2][0], matrix[2][1], matrix[2][2])));
+
+        // Coloane
+        everything.add(new ArrayList<>(asList(matrix[0][0], matrix[1][0], matrix[2][0])));
+        everything.add(new ArrayList<>(asList(matrix[0][1], matrix[1][1], matrix[2][1])));
+        everything.add(new ArrayList<>(asList(matrix[0][2], matrix[1][2], matrix[2][2])));
+
+        // Diagonale
+        everything.add(new ArrayList<>(asList(matrix[0][0], matrix[1][1], matrix[2][2])));
+        everything.add(new ArrayList<>(asList(matrix[0][2], matrix[1][1], matrix[2][0])));
+
+        return everything;
     }
 }
