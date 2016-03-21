@@ -281,6 +281,22 @@ public class Field
         return -1;
     }
 
+    public int[][] getBoardMatrix (int[][] mMacroboard, int row, int col)
+    {
+
+        int[][] aux = new int[COLS / 3][ROWS / 3];
+
+        for (int i = col * 3, k = 0; i < ((col * 3) + 3); i++, k++)
+        {
+            for (int j = row * 3, m = 0; j < ((row * 3) + 3); j++, m++)
+            {
+                aux[k][m] = mBoard[i][j];
+            }
+        }
+
+        return aux;
+    }
+
     public ArrayList<ArrayList<Integer>> getEverything (int[][] matrix)
     {
 
