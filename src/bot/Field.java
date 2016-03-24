@@ -346,8 +346,8 @@ class Field
         if (weight == 20)
         {
             int win_loss = checkWin(board);
-            if (win_loss == myID) return 100 * weight;
-            else if (win_loss == 3 - myID) return -100 * weight;
+            if (win_loss == myID) return 1000 * weight;
+            else if (win_loss == 3 - myID) return -1000 * weight;
         }
 
         // Corners
