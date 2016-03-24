@@ -28,7 +28,7 @@ import static java.util.Arrays.asList;
  * @author Jim van Eeden <jim@starapple.nl>, Joost de Meij <joost@starapple.nl>
  */
 
-public class Field
+class Field
 {
 
     private final int COLS = 9, ROWS = 9;
@@ -37,8 +37,9 @@ public class Field
     private int[][] mBoard;
     private int[][] mMacroboard;
     private String mLastError = "";
+    private int myID;
 
-    public Field ()
+    Field()
     {
         mBoard = new int[COLS][ROWS];
         mMacroboard = new int[COLS / 3][ROWS / 3];
@@ -51,23 +52,22 @@ public class Field
      * @param key   : type of data given
      * @param value : value
      */
-    public void parseGameData (String key, String value)
+    void parseGameData(String key, String value)
     {
-        if (key.equals("round"))
+        switch (key)
         {
-            mRoundNr = Integer.parseInt(value);
-        }
-        else if (key.equals("move"))
-        {
-            mMoveNr = Integer.parseInt(value);
-        }
-        else if (key.equals("field"))
-        {
-            parseFromString(value); /* Parse Field with data */
-        }
-        else if (key.equals("macroboard"))
-        {
-            parseMacroboardFromString(value); /* Parse macroboard with data */
+            case "round":
+                mRoundNr = Integer.parseInt(value);
+                break;
+            case "move":
+                mMoveNr = Integer.parseInt(value);
+                break;
+            case "field":
+                parseFromString(value); /* Parse Field with data */
+                break;
+            case "macroboard":
+                parseMacroboardFromString(value); /* Parse macroboard with data */
+                break;
         }
     }
 
@@ -76,7 +76,7 @@ public class Field
      *
      * @param s :
      */
-    public void parseFromString (String s)
+    private void parseFromString(String s)
     {
         System.err.println("Move " + mMoveNr);
         s = s.replace(";", ",");
@@ -97,7 +97,7 @@ public class Field
      *
      * @param s :
      */
-    public void parseMacroboardFromString (String s)
+    private void parseMacroboardFromString(String s)
     {
         String[] r = s.split(",");
         int counter = 0;
@@ -111,7 +111,7 @@ public class Field
         }
     }
 
-    public void clearBoard ()
+    private void clearBoard()
     {
         for (int x = 0; x < COLS; x++)
         {
@@ -122,9 +122,9 @@ public class Field
         }
     }
 
-    public ArrayList<Move> getAvailableMoves ()
+    ArrayList<Move> getAvailableMoves()
     {
-        ArrayList<Move> moves = new ArrayList<Move>();
+        ArrayList<Move> moves = new ArrayList<>();
 
         for (int y = 0; y < ROWS; y++)
         {
@@ -140,7 +140,7 @@ public class Field
         return moves;
     }
 
-    public Boolean isInActiveMicroboard (int x, int y)
+    private Boolean isInActiveMicroboard(int x, int y)
     {
         return mMacroboard[(int) x / 3][(int) y / 3] == -1;
     }
@@ -225,9 +225,6 @@ public class Field
     /**
      * Returns the player id on given column and row
      *
-     * @param column
-     * @param row
-     *
      * @return : int
      */
     public int getPlayerId (int column, int row)
@@ -235,7 +232,7 @@ public class Field
         return mBoard[column][row];
     }
 
-    public Field createCopy ()
+    Field createCopy()
     {
         Field clone = new Field();
         clone.mRoundNr = this.mRoundNr;
@@ -257,7 +254,7 @@ public class Field
         return clone;
     }
 
-    public void placeMove (Move move, boolean maximize)
+    void placeMove(Move move, boolean maximize)
     {
         if (maximize)
         {
@@ -276,43 +273,30 @@ public class Field
      *
      * @return The score for the current field - sum of all points
      */
-    public int computeScore ()
+    int computeScore()
     {
-        return -1;
-    }
+        // Get score from macro
+        int score = getBoardScore(mMacroboard, 10);
 
-    public int[][] getBoardMatrix (int[][] mMacroboard, int row, int col)
-    {
+        if (score > 5000) return Integer.MAX_VALUE; // WIN
+        else if (score < -5000) return Integer.MIN_VALUE; // LOSS
 
-        int[][] aux = new int[COLS / 3][ROWS / 3];
-
-        for (int i = col * 3, k = 0; i < ((col * 3) + 3); i++, k++)
-        {
-            for (int j = row * 3, m = 0; j < ((row * 3) + 3); j++, m++)
+        // Game not won/lost yet, get score from small boards
+        for (int row = 0; row < 3; row++)
+            for (int col = 0; col < 3; col++)
             {
-                aux[k][m] = mBoard[i][j];
+                if (mMacroboard[row][col] == 0)
+                {
+                    score += getBoardScore(getBoard(row, col), 1);
+                }
             }
-        }
 
-        return aux;
+        return score;
     }
 
-    public ArrayList<ArrayList<Integer>> getEverything (int[][] matrix)
+    private ArrayList<ArrayList<Integer>> getLines(int[][] matrix)
     {
-
-        /*
-
-        ArrayList<String> list = new ArrayList<String>()
-            {{
-                add("A");
-                add("B");
-                add("C");
-            }};
-
-            List<String> strings = new ArrayList<>(asList("foo", "bar", "baz"));
-        * */
-
-        ArrayList<ArrayList<Integer>> everything = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> everything = new ArrayList<>();
 
         // Linii
         everything.add(new ArrayList<>(asList(matrix[0][0], matrix[0][1], matrix[0][2])));
@@ -329,5 +313,86 @@ public class Field
         everything.add(new ArrayList<>(asList(matrix[0][2], matrix[1][1], matrix[2][0])));
 
         return everything;
+    }
+
+    private int getBoardScore(int[][] board, int tenIfMacro)
+    {
+        int score = 0;
+        int countMine, countTheir, countEmpty;
+
+        ArrayList<ArrayList<Integer>> lines = getLines(board);
+
+        for (ArrayList<Integer> line : lines)
+        {
+            countMine = countTheir = countEmpty = 0;
+
+            // Count filled cells on line
+            for (int i = 0; i < 3; i++)
+            {
+                if (line.get(i) == myID) countMine++;
+                else if (line.get(i) == 3 - myID) countTheir++;
+                else if (line.get(i) == 0) countEmpty++;
+            }
+
+            // TODO: Set scores for each case
+            if (countEmpty == 0) // Line completely filled in
+            {
+                switch (countMine)
+                {
+                    case 3:
+                        score += 100 * tenIfMacro; // WIN
+                    case 2:
+                        score += 1;
+                        break;
+                    case 1:
+                        score += -1;
+                        break;
+                    default:
+                        return -100 * tenIfMacro; // LOSS
+                }
+            } else if (countEmpty == 1)
+            {
+                switch (countMine)
+                {
+                    case 2:
+                        score += 10;
+                        break;
+                    case 1:
+                        score += 0;
+                        break;
+                    case 0:
+                        score += -10;
+                        break;
+                }
+            } else
+            {
+                if (countMine == 1) score += 1;
+                else if (countTheir == 1) score += -1;
+            }
+
+        }
+
+        return score;
+    }
+
+    private int[][] getBoard(int row, int col)
+    {
+
+        int[][] aux = new int[COLS / 3][ROWS / 3];
+
+        for (int i = col * 3, k = 0; i < col * 3 + 3; i++, k++)
+        {
+            for (int j = row * 3, m = 0; j < row * 3 + 3; j++, m++)
+            {
+                aux[k][m] = mBoard[i][j];
+            }
+        }
+
+        return aux;
+    }
+
+    void setMyID(int myID)
+    {
+        this.myID = myID;
     }
 }

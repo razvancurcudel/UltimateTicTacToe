@@ -60,6 +60,7 @@ public class BotParser
                 if (parts[1].equals("your_botid"))
                 {
                     mBotId = Integer.parseInt(parts[2]);
+                    mField.setMyID(mBotId);
                 }
             } else if (parts[0].equals("update") && parts[1].equals("game"))
             { /* new game data */
