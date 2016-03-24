@@ -45,10 +45,12 @@ public class BotStarter
      */
     public Move makeTurn(Field field)
     {
-        Random r = new Random();
-        ArrayList<Move> moves = field.getAvailableMoves();
-        Move move = moves.get(r.nextInt(moves.size())); /* get random move from available moves */
+//        Random r = new Random();
+//        ArrayList<Move> moves = field.getAvailableMoves();
+//        Move move = moves.get(r.nextInt(moves.size())); /* get random move from available moves */
 
-        return move;
+        Minimax smartestShitEVAR = new Minimax();
+
+        return smartestShitEVAR.minimax(field, 2, true);
     }
 }

@@ -150,7 +150,7 @@ class Field
      *
      * @return : reason why addMove returns false
      */
-    public String getLastError ()
+    public String getLastError()
     {
         return mLastError;
     }
@@ -163,7 +163,7 @@ class Field
      *            :
      * @return : String with player names for every cell, or 'empty' when cell is empty.
      */
-    public String toString ()
+    public String toString()
     {
         String r = "";
         int counter = 0;
@@ -187,7 +187,7 @@ class Field
      *
      * @return : Returns true when field is full, otherwise returns false.
      */
-    public boolean isFull ()
+    public boolean isFull()
     {
         for (int x = 0; x < COLS; x++)
             for (int y = 0; y < ROWS; y++)
@@ -197,17 +197,17 @@ class Field
         return true;
     }
 
-    public int getNrColumns ()
+    public int getNrColumns()
     {
         return COLS;
     }
 
-    public int getNrRows ()
+    public int getNrRows()
     {
         return ROWS;
     }
 
-    public boolean isEmpty ()
+    public boolean isEmpty()
     {
         for (int x = 0; x < COLS; x++)
         {
@@ -227,7 +227,7 @@ class Field
      *
      * @return : int
      */
-    public int getPlayerId (int column, int row)
+    public int getPlayerId(int column, int row)
     {
         return mBoard[column][row];
     }
@@ -237,6 +237,8 @@ class Field
         Field clone = new Field();
         clone.mRoundNr = this.mRoundNr;
         clone.mMoveNr = this.mMoveNr;
+        clone.myID = this.myID;
+
         for (int x = 0; x < COLS; x++)
         {
             for (int y = 0; y < ROWS; y++)
@@ -258,13 +260,33 @@ class Field
     {
         if (maximize)
         {
-            mBoard[move.getX()][move.getY()] = 1;
-        }
-        else
+            mBoard[move.getX()][move.getY()] = myID;
+        } else
         {
-            mBoard[move.getX()][move.getY()] = 2;
+            mBoard[move.getX()][move.getY()] = 3 - myID;
+        }
+
+        updateBoard(move);
+    }
+
+    private void updateBoard(Move move)
+    {
+        // Check win in board and update macro
+        int result = checkWin(getBoard(move.getX() / 3, move.getY() / 3));
+        if (result > 0)
+            mMacroboard[move.getX() / 3][move.getY() / 3] = result;
+
+        // Mark new active boards
+//        int nextMacroCell = (move.getX() % 3) * 3 + (move.getY() % 3);
+        if (mMacroboard[move.getX() % 3][move.getY() % 3] > 0)
+        {
+            for (int row = 0; row < 3; row++)
+                for (int col = 0; col < 3; col++)
+                    if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
+                        mMacroboard[row][col] = -1;
         }
     }
+
 
     /**
      * Steps (so far): <p> 1) Check win/lose condition -> MAX/MIN_VALUE 2) Check macroBoard -> TBP
@@ -276,8 +298,9 @@ class Field
     int computeScore()
     {
         // Get score from macro
-        int score = getBoardScore(mMacroboard, 10);
+        int score = getBoardScore(mMacroboard, 20);
 
+        // Check win/loss
         if (score > 5000) return Integer.MAX_VALUE; // WIN
         else if (score < -5000) return Integer.MIN_VALUE; // LOSS
 
@@ -285,7 +308,7 @@ class Field
         for (int row = 0; row < 3; row++)
             for (int col = 0; col < 3; col++)
             {
-                if (mMacroboard[row][col] == 0)
+                if (mMacroboard[row][col] < 1) // We don't care about ties - maybe?
                 {
                     score += getBoardScore(getBoard(row, col), 1);
                 }
@@ -315,64 +338,69 @@ class Field
         return everything;
     }
 
-    private int getBoardScore(int[][] board, int tenIfMacro)
+    // TODO: MAKE THIS PRETTY!
+    private int getBoardScore(int[][] board, int weight)
     {
         int score = 0;
-        int countMine, countTheir, countEmpty;
+
+        if (weight == 20)
+        {
+            int win_loss = checkWin(board);
+            if (win_loss == myID) return 100 * weight;
+            else if (win_loss == 3 - myID) return -100 * weight;
+        }
+
+        // Corners
+        if (board[0][0] == myID) score += 30 * weight;
+        else if (board[0][0] == 3 - myID) score += -30 * weight;
+
+        if (board[0][2] == myID) score += 30 * weight;
+        else if (board[0][2] == 3 - myID) score += -30 * weight;
+
+        if (board[2][0] == myID) score += 30 * weight;
+        else if (board[2][0] == 3 - myID) score += -30 * weight;
+
+        if (board[2][2] == myID) score += 30 * weight;
+        else if (board[2][2] == 3 - myID) score += -30 * weight;
+
+        // Sides
+        if (board[0][1] == myID) score += 20 * weight;
+        else if (board[0][1] == 3 - myID) score += -20 * weight;
+
+        if (board[1][0] == myID) score += 20 * weight;
+        else if (board[1][0] == 3 - myID) score += -20 * weight;
+
+        if (board[1][2] == myID) score += 20 * weight;
+        else if (board[1][2] == 3 - myID) score += -20 * weight;
+
+        if (board[2][1] == myID) score += 20 * weight;
+        else if (board[2][1] == 3 - myID) score += -20 * weight;
+
+        // Centre
+        if (board[1][1] == myID) score += 50 * weight;
+        else if (board[1][1] == 3 - myID) score += -50 * weight;
+
+        return score;
+    }
+
+    private int checkWin(int[][] board)
+    {
+        int countMine, countTheir;
 
         ArrayList<ArrayList<Integer>> lines = getLines(board);
 
         for (ArrayList<Integer> line : lines)
         {
-            countMine = countTheir = countEmpty = 0;
-
-            // Count filled cells on line
+            countMine = countTheir = 0;
             for (int i = 0; i < 3; i++)
-            {
                 if (line.get(i) == myID) countMine++;
                 else if (line.get(i) == 3 - myID) countTheir++;
-                else if (line.get(i) == 0) countEmpty++;
-            }
 
-            // TODO: Set scores for each case
-            if (countEmpty == 0) // Line completely filled in
-            {
-                switch (countMine)
-                {
-                    case 3:
-                        score += 100 * tenIfMacro; // WIN
-                    case 2:
-                        score += 1;
-                        break;
-                    case 1:
-                        score += -1;
-                        break;
-                    default:
-                        return -100 * tenIfMacro; // LOSS
-                }
-            } else if (countEmpty == 1)
-            {
-                switch (countMine)
-                {
-                    case 2:
-                        score += 10;
-                        break;
-                    case 1:
-                        score += 0;
-                        break;
-                    case 0:
-                        score += -10;
-                        break;
-                }
-            } else
-            {
-                if (countMine == 1) score += 1;
-                else if (countTheir == 1) score += -1;
-            }
-
+            if (countMine == 3) return myID;
+            else if (countTheir == 3) return 3 - myID;
         }
 
-        return score;
+        return -1;
     }
 
     private int[][] getBoard(int row, int col)
