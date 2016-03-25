@@ -350,15 +350,12 @@ class Field
         int score = 0;
 
         // Check win
-        if (weight == 20)
-        {
-            int win_loss = checkWin(board);
-            if (win_loss == myID) return 1000 * weight;
-            else if (win_loss == 3 - myID) return -1000 * weight;
-        }
+        int win_loss = checkWin(board);
+        if (win_loss == myID) return 1000 * weight;
+        else if (win_loss == 3 - myID) return -1000 * weight;
 
         // Check close to win
-        int countMine, countEmpty, countTheir;
+        int countMine = 0, countEmpty = 0, countTheir = 0;
         boolean blocked = false;
 
         ArrayList<ArrayList<Integer>> lines = getLines(board);
@@ -379,6 +376,7 @@ class Field
         }
 
         if (blocked) return 200 * weight;
+        if (countTheir == 2 && countEmpty == 1) return -250 * weight;
         // Check each individual cell from the board
 
         // Corners
