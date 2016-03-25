@@ -70,7 +70,7 @@ public class BotParser
                 if (parts[1].equals("move"))
                 { /* move requested */
                     Move move = this.bot.makeTurn(mField);
-                    System.out.println("place_move " + move.getX() + " " + move.getY());
+                    System.out.println("place_move " + move.getY() + " " + move.getX());
                 }
             } else
             {

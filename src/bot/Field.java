@@ -86,7 +86,7 @@ class Field
         {
             for (int x = 0; x < COLS; x++)
             {
-                mBoard[x][y] = Integer.parseInt(r[counter]);
+                mBoard[y][x] = Integer.parseInt(r[counter]);
                 counter++;
             }
         }
@@ -105,7 +105,7 @@ class Field
         {
             for (int x = 0; x < 3; x++)
             {
-                mMacroboard[x][y] = Integer.parseInt(r[counter]);
+                mMacroboard[y][x] = Integer.parseInt(r[counter]);
                 counter++;
             }
         }
@@ -305,11 +305,18 @@ class Field
     int computeScore()
     {
         // Get score from macro
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+            {
+                int result = checkWin(getBoard(i, j));
+                if (result > 0) mMacroboard[i][j] = result;
+            }
+
         int score = getBoardScore(mMacroboard, 20);
 
         // Check win/loss
-        if (score > 5000) return Integer.MAX_VALUE; // WIN
-        else if (score < -5000) return Integer.MIN_VALUE; // LOSS
+        if (score > 15000) return Integer.MAX_VALUE; // WIN
+        else if (score < -15000) return Integer.MIN_VALUE; // LOSS
 
         // Game not won/lost yet, get score from small boards
         for (int row = 0; row < 3; row++)
@@ -356,12 +363,14 @@ class Field
 
         // Check close to win
         int countMine = 0, countEmpty = 0, countTheir = 0;
-        boolean blocked = false;
+        int blocked = 0;
+        int closeToWin = 0;
 
         ArrayList<ArrayList<Integer>> lines = getLines(board);
 
         for (ArrayList<Integer> line : lines)
         {
+
             countMine = countEmpty = countTheir = 0;
 
             for (int i = 0; i < 3; i++)
@@ -371,12 +380,12 @@ class Field
                 else countTheir++;
             }
 
-            if (countEmpty == 1 && countMine == 2) return 250 * weight;
-            if (countTheir == 2 && countMine == 1) blocked = true;
+            if (countEmpty == 1 && countMine == 2) closeToWin++;
+            if (countTheir == 2 && countMine == 1) blocked++;
         }
 
-        if (blocked) return 200 * weight;
-        if (countTheir == 2 && countEmpty == 1) return -250 * weight;
+        if (blocked > 0) return 250 * weight * blocked;
+        if (closeToWin > 0) return 200 * weight * closeToWin;
         // Check each individual cell from the board
 
         // Corners
@@ -437,9 +446,9 @@ class Field
 
         int[][] aux = new int[COLS / 3][ROWS / 3];
 
-        for (int i = col * 3, k = 0; i < col * 3 + 3; i++, k++)
+        for (int i = row * 3, k = 0; i < row * 3 + 3; i++, k++)
         {
-            for (int j = row * 3, m = 0; j < row * 3 + 3; j++, m++)
+            for (int j = col * 3, m = 0; j < col * 3 + 3; j++, m++)
             {
                 aux[k][m] = mBoard[i][j];
             }
