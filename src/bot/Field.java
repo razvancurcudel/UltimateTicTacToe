@@ -359,8 +359,7 @@ class Field
 
         // Check close to win
         int countMine, countEmpty, countTheir;
-        int opponentCloseToWin = 0;
-        int myCloseToWin = 0;
+        boolean blocked = false;
 
         ArrayList<ArrayList<Integer>> lines = getLines(board);
 
@@ -375,16 +374,11 @@ class Field
                 else countTheir++;
             }
 
-            if (countEmpty == 1)
-            {
-                if (countMine == 2) myCloseToWin++;
-                else if (countTheir == 2) opponentCloseToWin++;
-            }
+            if (countEmpty == 1 && countMine == 2) return 250 * weight;
+            if (countTheir == 2 && countMine == 1) blocked = true;
         }
 
-        if (myCloseToWin + opponentCloseToWin > 0)
-            return 125 * myCloseToWin - 125 * opponentCloseToWin;
-
+        if (blocked) return 200 * weight;
         // Check each individual cell from the board
 
         // Corners
