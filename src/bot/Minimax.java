@@ -3,6 +3,7 @@ package bot;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.Random;
 
 // TODO: Implement Alpha-beta pruning
 public class Minimax
@@ -65,9 +66,20 @@ public class Minimax
             queue.add(moves.get(i));
         }
 
-        // Return best move for our case
-        return queue.peek();
+        // Get all best moves for our case
+        Move m = queue.poll();
+        ArrayList<Move> bestMoves = new ArrayList<>();
 
+        do
+        {
+            bestMoves.add(m);
+            m = queue.poll();
+        } while (m.score == bestMoves.get(0).score);
+
+        Random r = new Random();
+
+        // Return random best move for our case
+        return bestMoves.get(r.nextInt(bestMoves.size()));
     }
 
     class MaximizeComparator implements Comparator<Move>

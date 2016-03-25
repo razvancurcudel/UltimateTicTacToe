@@ -277,13 +277,20 @@ class Field
             mMacroboard[move.getX() / 3][move.getY() / 3] = result;
 
         // Mark new active boards
-//        int nextMacroCell = (move.getX() % 3) * 3 + (move.getY() % 3);
         if (mMacroboard[move.getX() % 3][move.getY() % 3] > 0)
         {
             for (int row = 0; row < 3; row++)
                 for (int col = 0; col < 3; col++)
                     if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
                         mMacroboard[row][col] = -1;
+        } else
+        {
+            for (int row = 0; row < 3; row++)
+                for (int col = 0; col < 3; col++)
+                    if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
+                        mMacroboard[row][col] = 0;
+
+            mMacroboard[move.getX() / 3][move.getY() / 3] = -1;
         }
     }
 
@@ -338,17 +345,45 @@ class Field
         return everything;
     }
 
-    // TODO: MAKE THIS PRETTY!
     private int getBoardScore(int[][] board, int weight)
     {
         int score = 0;
 
+        // Check win
         if (weight == 20)
         {
             int win_loss = checkWin(board);
             if (win_loss == myID) return 1000 * weight;
             else if (win_loss == 3 - myID) return -1000 * weight;
         }
+
+        // Check close to win
+        int countMine, countEmpty, countTheir;
+        boolean opponentCloseToWin = false;
+
+        ArrayList<ArrayList<Integer>> lines = getLines(board);
+
+        for (ArrayList<Integer> line : lines)
+        {
+            countMine = countEmpty = countTheir = 0;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (line.get(i) == 0) countEmpty++;
+                else if (line.get(i) == myID) countMine++;
+                else countTheir++;
+            }
+
+            if (countEmpty == 1)
+            {
+                if (countMine == 2) return 75 * weight;
+                else if (countTheir == 2) opponentCloseToWin = true;
+            }
+        }
+
+        if (opponentCloseToWin) return -75 * weight;
+
+        // Check each individual cell from the board
 
         // Corners
         if (board[0][0] == myID) score += 30 * weight;
