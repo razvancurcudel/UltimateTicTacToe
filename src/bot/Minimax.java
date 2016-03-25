@@ -82,7 +82,7 @@ public class Minimax
         return bestMoves.get(r.nextInt(bestMoves.size()));
     }
 
-    class MaximizeComparator implements Comparator<Move>
+    class MinimizeComparator implements Comparator<Move>
     {
         @Override
         public int compare(Move X, Move Y)
@@ -100,7 +100,7 @@ public class Minimax
         }
     }
 
-    class MinimizeComparator implements Comparator<Move>
+    class MaximizeComparator implements Comparator<Move>
     {
         @Override
         public int compare(Move X, Move Y)

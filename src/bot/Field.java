@@ -283,15 +283,16 @@ class Field
                 for (int col = 0; col < 3; col++)
                     if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
                         mMacroboard[row][col] = -1;
-        } else
-        {
-            for (int row = 0; row < 3; row++)
-                for (int col = 0; col < 3; col++)
-                    if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
-                        mMacroboard[row][col] = 0;
-
-            mMacroboard[move.getX() / 3][move.getY() / 3] = -1;
         }
+//        } else
+//        {
+//            for (int row = 0; row < 3; row++)
+//                for (int col = 0; col < 3; col++)
+//                    if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
+//                        mMacroboard[row][col] = 0;
+//
+//            mMacroboard[move.getX() / 3][move.getY() / 3] = -1;
+//        }
     }
 
 
@@ -359,7 +360,8 @@ class Field
 
         // Check close to win
         int countMine, countEmpty, countTheir;
-        boolean opponentCloseToWin = false;
+        int opponentCloseToWin = 0;
+        int myCloseToWin = 0;
 
         ArrayList<ArrayList<Integer>> lines = getLines(board);
 
@@ -376,12 +378,13 @@ class Field
 
             if (countEmpty == 1)
             {
-                if (countMine == 2) return 75 * weight;
-                else if (countTheir == 2) opponentCloseToWin = true;
+                if (countMine == 2) myCloseToWin++;
+                else if (countTheir == 2) opponentCloseToWin++;
             }
         }
 
-        if (opponentCloseToWin) return -75 * weight;
+        if (myCloseToWin + opponentCloseToWin > 0)
+            return 125 * myCloseToWin - 125 * opponentCloseToWin;
 
         // Check each individual cell from the board
 
