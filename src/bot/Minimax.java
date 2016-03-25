@@ -74,7 +74,7 @@ public class Minimax
         {
             bestMoves.add(m);
             m = queue.poll();
-        } while (m.score == bestMoves.get(0).score);
+        } while (!queue.isEmpty() && m.score == bestMoves.get(0).score);
 
         Random r = new Random();
 

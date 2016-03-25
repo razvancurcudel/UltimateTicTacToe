@@ -51,6 +51,6 @@ public class BotStarter
 
         Minimax smartestShitEVAR = new Minimax();
 
-        return smartestShitEVAR.minimax(field, 2, true);
+        return smartestShitEVAR.minimax(field, 3, true);
     }
 }

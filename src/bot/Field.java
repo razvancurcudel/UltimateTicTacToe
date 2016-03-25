@@ -283,16 +283,15 @@ class Field
                 for (int col = 0; col < 3; col++)
                     if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
                         mMacroboard[row][col] = -1;
+        } else
+        {
+            for (int row = 0; row < 3; row++)
+                for (int col = 0; col < 3; col++)
+                    if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
+                        mMacroboard[row][col] = 0;
+
+            mMacroboard[move.getX() / 3][move.getY() / 3] = -1;
         }
-//        } else
-//        {
-//            for (int row = 0; row < 3; row++)
-//                for (int col = 0; col < 3; col++)
-//                    if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
-//                        mMacroboard[row][col] = 0;
-//
-//            mMacroboard[move.getX() / 3][move.getY() / 3] = -1;
-//        }
     }
 
 
