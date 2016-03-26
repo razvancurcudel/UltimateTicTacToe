@@ -17,9 +17,6 @@
 
 package bot;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 /**
  * BotStarter class
  * <p>
@@ -43,14 +40,10 @@ public class BotStarter
      *
      * @return The column where the turn was made.
      */
-    public Move makeTurn(Field field)
+    Move makeTurn(Field field)
     {
-//        Random r = new Random();
-//        ArrayList<Move> moves = field.getAvailableMoves();
-//        Move move = moves.get(r.nextInt(moves.size())); /* get random move from available moves */
-
         Minimax smartestShitEVAR = new Minimax();
 
-        return smartestShitEVAR.minimax(field, 1, true, new Move());
+        return smartestShitEVAR.minimax(field, 1, true, new Move()); // Depth 1 for now
     }
 }

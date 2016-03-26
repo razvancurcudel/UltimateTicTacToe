@@ -6,17 +6,18 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 // TODO: Implement Alpha-beta pruning
-public class Minimax
+class Minimax
 {
 
-    public Minimax()
+    Minimax()
     {
 
     }
 
-    //could be better with alpha beta.
-    public Move minimax(Field field, int depth, boolean maximize, Move lastMove)
-    { // maximize = true --> your turn
+    // TODO: Add alpha-beta pruning
+    Move minimax(Field field, int depth, boolean maximize, Move lastMove)
+    {
+        // maximize = true --> your turn
         // maximize = false -->
         // opponent's turn
         ArrayList<Move> moves = field.getAvailableMoves();
@@ -52,18 +53,18 @@ public class Minimax
          */
         PriorityQueue<Move> queue = new PriorityQueue<>(1, comparator);
 
-        for (int i = 0; i < moves.size(); i++)
+        for (Move move : moves)
         {
             // Create copy of field and place move
             Field copy = field.createCopy();
-            copy.placeMove(moves.get(i), maximize);
+            copy.placeMove(move, maximize);
 
             // Get score of this move
-            Move minMaxResult = minimax(copy, depth - 1, !maximize, moves.get(i));
+            Move minMaxResult = minimax(copy, depth - 1, !maximize, move);
 
             // Push this move to the queue
-            moves.get(i).score = minMaxResult.score;
-            queue.add(moves.get(i));
+            move.score = minMaxResult.score;
+            queue.add(move);
         }
 
         // Get all best moves for our case
@@ -82,7 +83,7 @@ public class Minimax
         return bestMoves.get(r.nextInt(bestMoves.size()));
     }
 
-    class MinimizeComparator implements Comparator<Move>
+    private class MinimizeComparator implements Comparator<Move>
     {
         @Override
         public int compare(Move X, Move Y)
@@ -100,7 +101,7 @@ public class Minimax
         }
     }
 
-    class MaximizeComparator implements Comparator<Move>
+    private class MaximizeComparator implements Comparator<Move>
     {
         @Override
         public int compare(Move X, Move Y)

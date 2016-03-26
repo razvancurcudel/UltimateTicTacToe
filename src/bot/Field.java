@@ -36,7 +36,6 @@ class Field
     private int mMoveNr;
     private int[][] mBoard;
     private int[][] mMacroboard;
-    private String mLastError = "";
     private int myID;
 
     Field()
@@ -142,17 +141,7 @@ class Field
 
     private Boolean isInActiveMicroboard(int x, int y)
     {
-        return mMacroboard[(int) x / 3][(int) y / 3] == -1;
-    }
-
-    /**
-     * Returns reason why addMove returns false
-     *
-     * @return : reason why addMove returns false
-     */
-    public String getLastError()
-    {
-        return mLastError;
+        return mMacroboard[x / 3][y / 3] == -1;
     }
 
     @Override
@@ -182,56 +171,7 @@ class Field
         return r;
     }
 
-    /**
-     * Checks whether the field is full
-     *
-     * @return : Returns true when field is full, otherwise returns false.
-     */
-    public boolean isFull()
-    {
-        for (int x = 0; x < COLS; x++)
-            for (int y = 0; y < ROWS; y++)
-                if (mBoard[x][y] == 0)
-                    return false; // At least one cell is not filled
-        // All cells are filled
-        return true;
-    }
-
-    public int getNrColumns()
-    {
-        return COLS;
-    }
-
-    public int getNrRows()
-    {
-        return ROWS;
-    }
-
-    public boolean isEmpty()
-    {
-        for (int x = 0; x < COLS; x++)
-        {
-            for (int y = 0; y < ROWS; y++)
-            {
-                if (mBoard[x][y] > 0)
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Returns the player id on given column and row
-     *
-     * @return : int
-     */
-    public int getPlayerId(int column, int row)
-    {
-        return mBoard[column][row];
-    }
-
+    // Create copy of current field
     Field createCopy()
     {
         Field clone = new Field();
@@ -241,21 +181,21 @@ class Field
 
         for (int x = 0; x < COLS; x++)
         {
-            for (int y = 0; y < ROWS; y++)
-            {
-                clone.mBoard[x][y] = this.mBoard[x][y];
-            }
+            System.arraycopy(this.mBoard[x], 0, clone.mBoard[x], 0, ROWS);
         }
         for (int x = 0; x < 3; x++)
         {
-            for (int y = 0; y < 3; y++)
-            {
-                clone.mMacroboard[x][y] = this.mMacroboard[x][y];
-            }
+            System.arraycopy(this.mMacroboard[x], 0, clone.mMacroboard[x], 0, 3);
         }
         return clone;
     }
 
+    /**
+     * Places a move on the board
+     *
+     * @param move:     move to be placed
+     * @param maximize: true - our bot; false - opponent
+     */
     void placeMove(Move move, boolean maximize)
     {
         if (maximize)
@@ -269,6 +209,7 @@ class Field
         updateBoard(move);
     }
 
+    // Update macro board based on previous move - param move
     private void updateBoard(Move move)
     {
         // Check win in board and update macro
@@ -294,17 +235,19 @@ class Field
         }
     }
 
-
     /**
-     * Steps (so far): <p> 1) Check win/lose condition -> MAX/MIN_VALUE 2) Check macroBoard -> TBP
-     * points (2.1) Ignore dead boards 3) Check each miniBoard -> TBP points (3.1) Ignore dead
-     * squares
+     * Steps:
+     *     1) Check win/lose condition
+     *     2) Check macroBoard
+     *     3) Check the miniBoard of the last move placed
+     *
+     * @param m: last move placed
      *
      * @return The score for the current field - sum of all points
      */
     int computeScore(Move m)
     {
-        // Get score from macro
+        // Update the value of each macro cell (if won/lost)
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
             {
@@ -312,74 +255,59 @@ class Field
                 if (result > 0) mMacroboard[i][j] = result;
             }
 
+        // Get score from macro
         int score = getBoardScore(mMacroboard, 20);
 
-        // Check win/loss
+        // Check win/loss on macro
         if (score > 15000) return Integer.MAX_VALUE; // WIN
         else if (score < -15000) return Integer.MIN_VALUE; // LOSS
 
-        int r = m.getX() / 3, c = m.getY() / 3;
-        if (checkWin(getBoard(r, c)) == myID) return Integer.MAX_VALUE - 1;
+        // Add score of the cell we placed a move in
+        int moveRow = m.getX() / 3, moveCol = m.getY() / 3;
+        score += getBoardScore(getBoard(moveRow / 3, moveCol / 3), 1);
 
-        // Check close to win
-        int countMine = 0, countEmpty = 0, countTheir = 0;
-        int blocked = 0;
-        int closeToWin = 0;
-
-        ArrayList<ArrayList<Integer>> lines = getLines(getBoard(r, c));
-
-        for (ArrayList<Integer> line : lines)
-        {
-            countMine = countEmpty = countTheir = 0;
-
-            for (int i = 0; i < 3; i++)
-            {
-                if (line.get(i) < 1) countEmpty++;
-                else if (line.get(i) == myID) countMine++;
-                else if (line.get(i) == 3 - myID) countTheir++;
-            }
-
-            if (countEmpty == 1 && countMine == 2) closeToWin++;
-            if (countTheir == 2 && countMine == 1) blocked++;
-        }
-
-        if (blocked > 0) return 250 * blocked;
-        if (closeToWin > 0) return 200 * closeToWin;
-
-        // Game not won/lost yet, get score from small boards
-        for (int row = 0; row < 3; row++)
-            for (int col = 0; col < 3; col++)
-            {
-                if (mMacroboard[row][col] < 1) // We don't care about ties - maybe?
-                {
-                    score += getBoardScore(getBoard(row, col), 1);
-                }
-            }
-
+        // That's our score
         return score;
     }
 
+    // Get each possible line from the board - 3 lines, 3 columns, 2 diagonals
     private ArrayList<ArrayList<Integer>> getLines(int[][] matrix)
     {
         ArrayList<ArrayList<Integer>> everything = new ArrayList<>();
 
-        // Linii
+        // Lines
         everything.add(new ArrayList<>(asList(matrix[0][0], matrix[0][1], matrix[0][2])));
         everything.add(new ArrayList<>(asList(matrix[1][0], matrix[1][1], matrix[1][2])));
         everything.add(new ArrayList<>(asList(matrix[2][0], matrix[2][1], matrix[2][2])));
 
-        // Coloane
+        // Columns
         everything.add(new ArrayList<>(asList(matrix[0][0], matrix[1][0], matrix[2][0])));
         everything.add(new ArrayList<>(asList(matrix[0][1], matrix[1][1], matrix[2][1])));
         everything.add(new ArrayList<>(asList(matrix[0][2], matrix[1][2], matrix[2][2])));
 
-        // Diagonale
+        // Diagonals
         everything.add(new ArrayList<>(asList(matrix[0][0], matrix[1][1], matrix[2][2])));
         everything.add(new ArrayList<>(asList(matrix[0][2], matrix[1][1], matrix[2][0])));
 
         return everything;
     }
 
+    /**
+     *  Compute score for a single 3x3 board. Return score if conditions for a case are met.
+     *
+     * Cases:
+     * 1) Check win/loss - +- 1000 points
+     * 2) Check if I blocked any of opponent's moves - 250 points / blocked line (ex: X - X - O)
+     * 3) Check if I'm close to win - 200 points / line (ex: O - O - empty)
+     * 4) Empty board - check position of each O / X placed
+     *      (4.1) Middle cell - 50 points
+     *      (4.2) Corner cell - 30 points
+     *      (4.3) Side cell - 20 points
+     *
+     * @param board: 3x3 board (can be macro or small)
+     * @param weight: weight of the board - 20 for macro, 1 for small board
+     * @return board's score
+     */
     private int getBoardScore(int[][] board, int weight)
     {
         int score = 0;
@@ -390,7 +318,7 @@ class Field
         else if (win_loss == 3 - myID) return -1000 * weight;
 
         // Check close to win
-        int countMine = 0, countEmpty = 0, countTheir = 0;
+        int countMine, countEmpty, countTheir;
         int blocked = 0;
         int closeToWin = 0;
 
@@ -449,6 +377,7 @@ class Field
         return score;
     }
 
+    // Check if either player has won the current 3x3 board - param board
     private int checkWin(int[][] board)
     {
         int countMine, countTheir;
@@ -469,11 +398,13 @@ class Field
         return -1;
     }
 
+    // Gets the 3x3 board corresponding to mMacroboard[row][col]
     private int[][] getBoard(int row, int col)
     {
-
+        // Small 3x3 board
         int[][] aux = new int[COLS / 3][ROWS / 3];
 
+        // Copy elements to the 3x3 board
         for (int i = row * 3, k = 0; i < row * 3 + 3; i++, k++)
         {
             for (int j = col * 3, m = 0; j < col * 3 + 3; j++, m++)
@@ -485,6 +416,7 @@ class Field
         return aux;
     }
 
+    // Set player ID
     void setMyID(int myID)
     {
         this.myID = myID;

@@ -25,22 +25,17 @@ package bot;
  * @author Jim van Eeden <jim@starapple.nl>, Joost de Meij <joost@starapple.nl>
  */
 
-public class Move
+class Move
 {
-    public int score;
-    int mX, mY;
+    int score;
+    private int mX, mY;
 
-    public Move()
+    Move()
     {
         this.score = 0;
     }
 
-    public Move(int score)
-    {
-        this.score = score;
-    }
-
-    public Move(int x, int y)
+    Move(int x, int y)
     {
         mX = x;
         mY = y;
@@ -48,12 +43,12 @@ public class Move
         this.score = 0;
     }
 
-    public int getX()
+    int getX()
     {
         return mX;
     }
 
-    public int getY()
+    int getY()
     {
         return mY;
     }

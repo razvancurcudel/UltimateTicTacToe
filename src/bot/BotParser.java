@@ -28,23 +28,21 @@ import java.util.Scanner;
  * @author Jim van Eeden <jim@starapple.nl>
  */
 
-public class BotParser
+class BotParser
 {
 
-    public static int mBotId = 0;
-    final Scanner scan;
-    final BotStarter bot;
-    private Field mField;
+    private final Scanner scan;
+    private final BotStarter bot;
 
-    public BotParser(BotStarter bot)
+    BotParser(BotStarter bot)
     {
         this.scan = new Scanner(System.in);
         this.bot = bot;
     }
 
-    public void run()
+    void run()
     {
-        mField = new Field();
+        Field mField = new Field();
         while (scan.hasNextLine())
         {
             String line = scan.nextLine();
@@ -59,7 +57,7 @@ public class BotParser
             {
                 if (parts[1].equals("your_botid"))
                 {
-                    mBotId = Integer.parseInt(parts[2]);
+                    int mBotId = Integer.parseInt(parts[2]);
                     mField.setMyID(mBotId);
                 }
             } else if (parts[0].equals("update") && parts[1].equals("game"))
