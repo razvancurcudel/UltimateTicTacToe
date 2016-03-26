@@ -318,14 +318,15 @@ class Field
         if (score > 15000) return Integer.MAX_VALUE; // WIN
         else if (score < -15000) return Integer.MIN_VALUE; // LOSS
 
-        if (checkWin(getBoard(m.getX() % 3, m.getY() % 3)) == myID) return Integer.MAX_VALUE - 1;
+        int r = m.getX() / 3, c = m.getY() / 3;
+        if (checkWin(getBoard(r, c)) == myID) return Integer.MAX_VALUE - 1;
 
         // Check close to win
         int countMine = 0, countEmpty = 0, countTheir = 0;
         int blocked = 0;
         int closeToWin = 0;
 
-        ArrayList<ArrayList<Integer>> lines = getLines(getBoard(m.getX() % 3, m.getY() % 3));
+        ArrayList<ArrayList<Integer>> lines = getLines(getBoard(r, c));
 
         for (ArrayList<Integer> line : lines)
         {
