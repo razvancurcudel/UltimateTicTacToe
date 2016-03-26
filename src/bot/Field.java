@@ -302,7 +302,7 @@ class Field
      *
      * @return The score for the current field - sum of all points
      */
-    int computeScore()
+    int computeScore(Move m)
     {
         // Get score from macro
         for (int i = 0; i < 3; i++)
@@ -317,6 +317,33 @@ class Field
         // Check win/loss
         if (score > 15000) return Integer.MAX_VALUE; // WIN
         else if (score < -15000) return Integer.MIN_VALUE; // LOSS
+
+        if (checkWin(getBoard(m.getX() % 3, m.getY() % 3)) == myID) return Integer.MAX_VALUE - 1;
+
+        // Check close to win
+        int countMine = 0, countEmpty = 0, countTheir = 0;
+        int blocked = 0;
+        int closeToWin = 0;
+
+        ArrayList<ArrayList<Integer>> lines = getLines(getBoard(m.getX() % 3, m.getY() % 3));
+
+        for (ArrayList<Integer> line : lines)
+        {
+            countMine = countEmpty = countTheir = 0;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (line.get(i) < 1) countEmpty++;
+                else if (line.get(i) == myID) countMine++;
+                else if (line.get(i) == 3 - myID) countTheir++;
+            }
+
+            if (countEmpty == 1 && countMine == 2) closeToWin++;
+            if (countTheir == 2 && countMine == 1) blocked++;
+        }
+
+        if (blocked > 0) return 250 * blocked;
+        if (closeToWin > 0) return 200 * closeToWin;
 
         // Game not won/lost yet, get score from small boards
         for (int row = 0; row < 3; row++)
@@ -375,9 +402,9 @@ class Field
 
             for (int i = 0; i < 3; i++)
             {
-                if (line.get(i) == 0) countEmpty++;
+                if (line.get(i) < 1) countEmpty++;
                 else if (line.get(i) == myID) countMine++;
-                else countTheir++;
+                else if (line.get(i) == 3 - myID) countTheir++;
             }
 
             if (countEmpty == 1 && countMine == 2) closeToWin++;
