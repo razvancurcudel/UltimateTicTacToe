@@ -263,7 +263,7 @@ class Field
         else if (score < -15000) return Integer.MIN_VALUE; // LOSS
 
         // Add score of the cell we placed a move in
-        int moveRow = m.getX() / 3, moveCol = m.getY() / 3;
+        int moveRow = m.getX(), moveCol = m.getY();
         score += getBoardScore(getBoard(moveRow / 3, moveCol / 3), 1);
 
         // That's our score
