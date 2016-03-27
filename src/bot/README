@@ -1,0 +1,44 @@
+PROIECTAREA ALGORITMILOR - ULTIMATE TIC-TAC-TOE
+
+ETAPA 0:
+
+Nume echipa: 'name': undeclared identifier
+Bot oficial: CAnameundeclrd
+
+Membri echipa:
+
+Dima Cristian-Mihai 325CA capitan
+Curcudel Ioan-Razvan 325CA
+Stan Anca-Gabriela 325CA
+Tanase Cristina-Mihaela 325CA
+
+
+ETAPA 1:
+
+Generam fiecare mutare posibila si calculam scorul placii de X si O pentru fiecare mutare (minimax cu depth 1).
+Alegem apoi mutarea cea mai favorabila (cu scor maxim). Daca exista mai multe astfel de mutari, alegem una la intamplare.
+
+Calculam scorul astfel:
+
+1) Verificam daca mutarea a castigat placuta si actualizam casuta din macroboard.
+
+2) Verificam daca am castigat meciul -> scor maxim.
+
+3) Daca nu am castigat meciul, calculam cate linii ale oponentului am blocat.
+De exemplu daca botul nostru pune O, atunci o linie blocata este X - X - O.
+Fiecare placuta de 3x3 are 8 astfel de "linii": 3 linii, 3 coloane si 2 diagonale.
+Daca exista macar o linie blocata, scorul va fi 250 * nr_linii_blocate.
+
+4) Calculam cate linii ale noastre sunt aproape castigate (exemplu: O - O - -).
+Daca exista macar o linie aproape castigata scorul va fi 200 * nr_linii_aproape_castigate.
+
+5) Daca nu se verifica nicio conditie din cele precedente calculam scorul pentru fiecare celula din casa de 3x3.
+
+    30 - 20 - 30
+    20 - 50 - 20
+    30 - 20 - 30
+
+Daca celula este a oponentului vom scadea valoarea casutei din scorul final.
+
+Daca mutarea nu ne castiga meciul (pasul 2) atunci scorul va fi scorMacro + scorBoard folosind pasii 3-5.
+scorBoard este scorul placii de 3x3 in care se afla miscarea generata.
