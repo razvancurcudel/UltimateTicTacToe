@@ -38,10 +38,14 @@ class Field
     private int[][] mMacroboard;
     private int myID;
 
+    // Etapa 2
+    private int[][] moveTracker;
+
     Field()
     {
         mBoard = new int[COLS][ROWS];
         mMacroboard = new int[COLS / 3][ROWS / 3];
+        moveTracker = new int[COLS / 3][ROWS / 3];
         clearBoard();
     }
 
@@ -198,6 +202,7 @@ class Field
      */
     void placeMove(Move move, boolean maximize)
     {
+        // Place player ID in cell
         if (maximize)
         {
             mBoard[move.getX()][move.getY()] = myID;
@@ -206,7 +211,25 @@ class Field
             mBoard[move.getX()][move.getY()] = 3 - myID;
         }
 
+        // Update macroBoard - win, loss, next possible moves
         updateBoard(move);
+
+        // Update moveTracker
+        moveTracker[move.getX() / 3][move.getX() / 3] = 1;
+    }
+
+    /**
+     * Initialize moveTracker
+     * <p>
+     * 0 - no move placed in this macro cell
+     * 1 - move placed in macro cell - score not yet computed
+     * 2 - macro cell score computed
+     */
+    void clearMoveTracker()
+    {
+        for (int row = 0; row < ROWS / 3; row++)
+            for (int col = 0; col < COLS / 3; col++)
+                moveTracker[row][col] = 0;
     }
 
     // Update macro board based on previous move - param move
@@ -262,9 +285,11 @@ class Field
         if (score > 15000) return Integer.MAX_VALUE; // WIN
         else if (score < -15000) return Integer.MIN_VALUE; // LOSS
 
-        // Add score of the cell we placed a move in
-        int moveRow = m.getX(), moveCol = m.getY();
-        score += getBoardScore(getBoard(moveRow / 3, moveCol / 3), 1);
+        // Add score of the cells we placed a move in
+        for (int row = 0; row < ROWS / 3; row++)
+            for (int col = 0; col < COLS / 3; col++)
+                if (moveTracker[row][col] == 1)
+                    score += getBoardScore(getBoard(row, col), 1);
 
         // That's our score
         return score;
@@ -314,8 +339,8 @@ class Field
 
         // Check win
         int win_loss = checkWin(board);
-        if (win_loss == myID) return 1000 * weight;
-        else if (win_loss == 3 - myID) return -1000 * weight;
+        if (win_loss == myID) return 125 * weight;
+        else if (win_loss == 3 - myID) return -125 * weight;
 
         // Check close to win
         int countMine, countEmpty, countTheir;
@@ -340,8 +365,11 @@ class Field
             if (countTheir == 2 && countMine == 1) blocked++;
         }
 
-        if (blocked > 0) return 250 * weight * blocked;
-        if (closeToWin > 0) return 200 * weight * closeToWin;
+        // TODO: Fix these - maybe check which cell gives best chances
+        // Example closeToWin with centre cell > closeToWin w/ corner > closeToWin w/ side
+        // Same for blocked
+        if (blocked > 0) return 95 * weight + blocked;
+        if (closeToWin > 0) return 75 * weight + closeToWin;
         // Check each individual cell from the board
 
         // Corners

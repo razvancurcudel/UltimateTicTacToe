@@ -5,7 +5,9 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-// TODO: Implement Alpha-beta pruning
+// TODO: Implement Alpha-beta pruning   - Etapa 3
+// TODO: Fix heuristics                 - Etapa 2.1
+// TODO: Add static board               - Etapa 2.2
 class Minimax
 {
 
@@ -14,7 +16,6 @@ class Minimax
 
     }
 
-    // TODO: Add alpha-beta pruning
     Move minimax(Field field, int depth, boolean maximize, Move lastMove)
     {
         // maximize = true --> your turn
@@ -22,6 +23,7 @@ class Minimax
         // opponent's turn
         ArrayList<Move> moves = field.getAvailableMoves();
 
+        // Check if we've reached the final level - compute score for board
         if (depth == 0 || moves.size() == 0)
         {
             Move m = new Move(-1, -1); // Coordinates don't matter
@@ -29,7 +31,8 @@ class Minimax
 
             return m;
         }
-        // Generate all moves possible
+
+        // Generate all possible moves
         // Make a copy of field, place first move and create a node
         // Apply minimax on that note with depth-1;
 
