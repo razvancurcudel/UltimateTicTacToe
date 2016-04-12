@@ -282,8 +282,8 @@ class Field
         int score = getBoardScore(mMacroboard, 20);
 
         // Check win/loss on macro
-        if (score > 15000) return Integer.MAX_VALUE; // WIN
-        else if (score < -15000) return Integer.MIN_VALUE; // LOSS
+        if (score > 2000) return Integer.MAX_VALUE; // WIN
+        else if (score < -2000) return Integer.MIN_VALUE; // LOSS
 
         // Add score of the cells we placed a move in
         for (int row = 0; row < ROWS / 3; row++)
