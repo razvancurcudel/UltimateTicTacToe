@@ -45,6 +45,10 @@ public class BotStarter
         Minimax smartestShitEVAR = new Minimax();
 
         field.clearMoveTracker();
-        return smartestShitEVAR.minimax(field, 4, true, new Move()); // Depth 1 for now
+
+        int depth = 4;
+        if (field.mRoundNr < 6) depth = 2;
+
+        return smartestShitEVAR.minimax(field, depth, true);
     }
 }

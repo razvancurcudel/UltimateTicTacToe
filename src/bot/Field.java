@@ -32,7 +32,7 @@ class Field
 {
 
     private final int COLS = 9, ROWS = 9;
-    private int mRoundNr;
+    int mRoundNr;
     private int mMoveNr;
     private int[][] mBoard;
     private int[][] mMacroboard;
@@ -264,19 +264,17 @@ class Field
      *     2) Check macroBoard
      *     3) Check the miniBoard of the last move placed
      *
-     * @param m: last move placed
-     *
      * @return The score for the current field - sum of all points
      */
-    int computeScore(Move m)
+    int computeScore()
     {
-        // Update the value of each macro cell (if won/lost)
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-            {
-                int result = checkWin(getBoard(i, j));
-                if (result > 0) mMacroboard[i][j] = result;
-            }
+//        // Update the value of each macro cell (if won/lost)
+//        for (int i = 0; i < 3; i++)
+//            for (int j = 0; j < 3; j++)
+//            {
+//                int result = checkWin(getBoard(i, j));
+//                if (result > 0) mMacroboard[i][j] = result;
+//            }
 
         // Get score from macro
         int score = getBoardScore(mMacroboard, 20);
@@ -448,5 +446,55 @@ class Field
     void setMyID(int myID)
     {
         this.myID = myID;
+    }
+
+
+    // EURISTICA DE TEST - ANCA
+    int computeScoreAnca()
+    {
+        // Check win on macro
+        int winID = checkWin(mMacroboard);
+        if (winID == myID) return 1000000;
+        else if (winID == 3 - myID) return -1000000;
+
+        // Get score from macro
+        int score = getBoardScoreAnca(mMacroboard, 23);
+
+        // Add score of the cells we placed a move in
+        for (int row = 0; row < ROWS / 3; row++)
+            for (int col = 0; col < COLS / 3; col++)
+                if (moveTracker[row][col] == 1)
+                    score += getBoardScore(getBoard(row, col), 1);
+
+        // That's our score
+        return score;
+    }
+
+    private int getBoardScoreAnca(int[][] board, int weight)
+    {
+        int countMine, countTheir;
+        int myScore, theirScore;
+
+        ArrayList<ArrayList<Integer>> lines = getLines(board);
+        myScore = theirScore = 0;
+
+        for (ArrayList<Integer> line : lines)
+        {
+            countMine = countTheir = 0;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (line.get(i) == myID) countMine++;
+                else if (line.get(i) == 3 - myID) countTheir++;
+            }
+
+            if (countMine > 0 && countTheir > 0) continue;
+            else if (countMine == 1) myScore += 1;
+            else if (countMine == 2) myScore += 7;
+            else if (countTheir == 1) theirScore += 1;
+            else if (countTheir == 2) theirScore += 7;
+        }
+
+        return myScore - theirScore;
     }
 }

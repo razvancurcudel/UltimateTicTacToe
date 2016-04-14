@@ -16,7 +16,7 @@ class Minimax
 
     }
 
-    Move minimax(Field field, int depth, boolean maximize, Move lastMove)
+    Move minimax(Field field, int depth, boolean maximize)
     {
         // maximize = true --> your turn
         // maximize = false -->
@@ -27,7 +27,7 @@ class Minimax
         if (depth == 0 || moves.size() == 0)
         {
             Move m = new Move(-1, -1); // Coordinates don't matter
-            m.score = field.computeScore(lastMove);
+            m.score = field.computeScore();
 
             return m;
         }
@@ -63,7 +63,7 @@ class Minimax
             copy.placeMove(move, maximize);
 
             // Get score of this move
-            Move minMaxResult = minimax(copy, depth - 1, !maximize, move);
+            Move minMaxResult = minimax(copy, depth - 1, !maximize);
 
             // Push this move to the queue
             move.score = minMaxResult.score;
