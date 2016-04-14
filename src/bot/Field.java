@@ -260,9 +260,9 @@ class Field
 
     /**
      * Steps:
-     *     1) Check win/lose condition
-     *     2) Check macroBoard
-     *     3) Check the miniBoard of the last move placed
+     * 1) Check win/lose condition
+     * 2) Check macroBoard
+     * 3) Check the miniBoard of the last move placed
      *
      * @return The score for the current field - sum of all points
      */
@@ -316,18 +316,18 @@ class Field
     }
 
     /**
-     *  Compute score for a single 3x3 board. Return score if conditions for a case are met.
-     *
+     * Compute score for a single 3x3 board. Return score if conditions for a case are met.
+     * <p>
      * Cases:
      * 1) Check win/loss - +- 1000 points
      * 2) Check if I blocked any of opponent's moves - 250 points / blocked line (ex: X - X - O)
      * 3) Check if I'm close to win - 200 points / line (ex: O - O - empty)
      * 4) Empty board - check position of each O / X placed
-     *      (4.1) Middle cell - 50 points
-     *      (4.2) Corner cell - 30 points
-     *      (4.3) Side cell - 20 points
+     * (4.1) Middle cell - 50 points
+     * (4.2) Corner cell - 30 points
+     * (4.3) Side cell - 20 points
      *
-     * @param board: 3x3 board (can be macro or small)
+     * @param board:  3x3 board (can be macro or small)
      * @param weight: weight of the board - 20 for macro, 1 for small board
      * @return board's score
      */
@@ -496,5 +496,88 @@ class Field
         }
 
         return myScore - theirScore;
+    }
+
+    public int computeScoreTina()
+    {
+        // Check win on macro
+        int winID = checkWin(mMacroboard);
+        if (winID == myID) return 1000000;
+        else if (winID == 3 - myID) return -1000000;
+
+        int score = getBoardScoreTina(mMacroboard);
+
+        // Weight = 2
+        if (mMacroboard[0][1] == myID) score += 1000 * 2;
+        else if (mMacroboard[0][1] == 3 - myID) score -= 1000 * 2;
+        else if (moveTracker[0][1] == 1) score += getBoardScoreTina(getBoard(0, 1)) * 2;
+
+        if (mMacroboard[1][0] == myID) score += 1000 * 2;
+        else if (mMacroboard[1][0] == 3 - myID) score -= 1000 * 2;
+        else if (moveTracker[1][0] == 1) score += getBoardScoreTina(getBoard(1, 0)) * 2;
+
+        if (mMacroboard[1][2] == myID) score += 1000 * 2;
+        else if (mMacroboard[1][2] == 3 - myID) score -= 1000 * 2;
+        else if (moveTracker[1][2] == 1) score += getBoardScoreTina(getBoard(1, 2)) * 2;
+
+        if (mMacroboard[2][1] == myID) score += 1000 * 2;
+        else if (mMacroboard[2][1] == 3 - myID) score -= 1000 * 2;
+        else if (moveTracker[2][1] == 1) score += getBoardScoreTina(getBoard(2, 1)) * 2;
+
+        // Weight = 3
+        if (mMacroboard[0][0] == myID) score += 1000 * 3;
+        else if (mMacroboard[0][0] == 3 - myID) score -= 1000 * 3;
+        else if (moveTracker[0][0] == 1) score += getBoardScoreTina(getBoard(0, 0)) * 3;
+
+        if (mMacroboard[0][2] == myID) score += 1000 * 3;
+        else if (mMacroboard[0][2] == 3 - myID) score -= 1000 * 3;
+        else if (moveTracker[0][2] == 1) score += getBoardScoreTina(getBoard(0, 2)) * 3;
+
+        if (mMacroboard[2][0] == myID) score += 1000 * 3;
+        else if (mMacroboard[2][0] == 3 - myID) score -= 1000 * 3;
+        else if (moveTracker[2][0] == 1) score += getBoardScoreTina(getBoard(2, 0)) * 3;
+
+        if (mMacroboard[2][2] == myID) score += 1000 * 3;
+        else if (mMacroboard[2][2] == 3 - myID) score -= 1000 * 3;
+        else if (moveTracker[2][2] == 1) score += getBoardScoreTina(getBoard(2, 2)) * 3;
+
+        // Weight = 4
+        if (mMacroboard[1][1] == myID) score += 1000 * 4;
+        else if (mMacroboard[1][1] == 3 - myID) score -= 1000 * 4;
+        else if (moveTracker[1][1] == 1) score += getBoardScoreTina(getBoard(1, 1)) * 4;
+
+        // That's our score
+        return score;
+    }
+
+    private int getBoardScoreTina(int[][] board)
+    {
+        int countMine, countTheir;
+        int score;
+
+        ArrayList<ArrayList<Integer>> lines = getLines(board);
+        score = 0;
+
+        for (int i = 0; i < 3; i++)
+        {
+            ArrayList<Integer> line = lines.get(i);
+
+            countMine = countTheir = 0;
+
+            for (int j = 0; j < 3; j++)
+            {
+                if (line.get(j) == myID) countMine++;
+                else if (line.get(j) == 3 - myID) countTheir++;
+            }
+
+            if (countMine == 0 && countTheir == 0) score += 1;
+            else if (countMine > 0 && countTheir > 0) continue;
+            else if (countMine == 1) score += 3;
+            else if (countMine == 2) score += 5;
+            else if (countTheir == 1) score += 4;
+            else if (countTheir == 2) score += 2;
+        }
+
+        return score;
     }
 }
