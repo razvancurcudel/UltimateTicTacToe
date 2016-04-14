@@ -27,7 +27,7 @@ class Minimax
         if (depth == 0 || moves.size() == 0)
         {
             Move m = new Move(-1, -1); // Coordinates don't matter
-            m.score = field.computeScore();
+            m.score = field.computeScoreAnca();
 
             return m;
         }

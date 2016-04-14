@@ -464,7 +464,7 @@ class Field
         for (int row = 0; row < ROWS / 3; row++)
             for (int col = 0; col < COLS / 3; col++)
                 if (moveTracker[row][col] == 1)
-                    score += getBoardScore(getBoard(row, col), 1);
+                    score += getBoardScoreAnca(getBoard(row, col), 1);
 
         // That's our score
         return score;
