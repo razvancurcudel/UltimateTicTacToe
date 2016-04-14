@@ -254,7 +254,7 @@ class Field
         {
             for (int row = 0; row < 3; row++)
                 for (int col = 0; col < 3; col++)
-                    if (mMacroboard[row][col] < 1 && !isFull(mMacroboard[row][col])) // Not won/lost - ties don't matter YET
+                    if (mMacroboard[row][col] < 1 && !isFull(getBoard(row, col))) // Not won/lost - ties don't matter YET
                         mMacroboard[row][col] = -1;
         } else
         {
