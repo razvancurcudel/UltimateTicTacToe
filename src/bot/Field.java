@@ -250,7 +250,7 @@ class Field
             mMacroboard[move.getX() / 3][move.getY() / 3] = result;
 
         // Mark new active boards
-        if (mMacroboard[move.getX() % 3][move.getY() % 3] > 0)
+        if (mMacroboard[move.getX() % 3][move.getY() % 3] > 0 || isFull(getBoard(move.getX() % 3, move.getY() % 3)))
         {
             for (int row = 0; row < 3; row++)
                 for (int col = 0; col < 3; col++)
