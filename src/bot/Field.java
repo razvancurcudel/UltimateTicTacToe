@@ -514,7 +514,7 @@ class Field
         if (winID == myID) return 1000000;
         else if (winID == 3 - myID) return -1000000;
 
-        int score = getBoardScoreTina(mMacroboard);
+        int score = getBoardScoreTina(mMacroboard) * 10;
 
         // Weight = 2
         if (mMacroboard[0][1] == myID) score += 1000 * 2;
