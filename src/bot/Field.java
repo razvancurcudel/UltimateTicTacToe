@@ -232,6 +232,15 @@ class Field
                 moveTracker[row][col] = 0;
     }
 
+    private boolean isFull(int[][] board)
+    {
+        for (int row = 0; row < 3; row++)
+            for (int col = 0; col < 3; col++)
+                if (board[row][col] == 0) return false;
+                
+        return true;
+    }
+
     // Update macro board based on previous move - param move
     private void updateBoard(Move move)
     {
@@ -245,7 +254,7 @@ class Field
         {
             for (int row = 0; row < 3; row++)
                 for (int col = 0; col < 3; col++)
-                    if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
+                    if (mMacroboard[row][col] < 1 && !isFull(mMacroboard[row][col])) // Not won/lost - ties don't matter YET
                         mMacroboard[row][col] = -1;
         } else
         {
@@ -254,7 +263,7 @@ class Field
                     if (mMacroboard[row][col] < 1) // Not won/lost - ties don't matter YET
                         mMacroboard[row][col] = 0;
 
-            mMacroboard[move.getX() / 3][move.getY() / 3] = -1;
+            mMacroboard[move.getX() % 3][move.getY() % 3] = -1;
         }
     }
 
